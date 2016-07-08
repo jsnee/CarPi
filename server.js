@@ -173,7 +173,8 @@ server.register(require('inert'), (err) => {
             var results;
             PythonShell.run('bin/Adapter/getProperties.py', function (err, data) {
                 if (err) throw err;
-                reply(data);
+                if (Array.isArray(data)) data = data[0];
+                reply(JSON.parse(data));
             });
         }
     });
