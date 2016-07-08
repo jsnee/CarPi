@@ -31,6 +31,12 @@ vm.update = function () {
 	$.get("/system/update");
 };
 
+vm.quit = function () {
+	if (confirm("Quit CarPi?")) {
+	  $.get("/system/quit");
+	}
+}
+
 vm.shutdown = function () {
 	$.get("/system/shutdown");
 };

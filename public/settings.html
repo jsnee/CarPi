@@ -29,7 +29,7 @@
 						<div data-bind="text: 'Current Version: {0}'.format(vm.carPiInfo() ? vm.carPiInfo().version : null), visible: vm.carPiInfo"></div>
 						<div data-bind="text: 'Available Version: {0}'.format(vm.availableVersion()), visible: vm.availableVersion"></div>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.update, enable: vm.updateAvailable">Update</a>
-						<a class="waves-effect waves-light btn blue" data-bind="click: function () { window.close(); }">Close CarPi</a>
+						<a class="waves-effect waves-light btn blue" data-bind="click: vm.quit">Quit Car-Pi</a>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.shutdown">Shutdown</a>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.reboot">Reboot</a>
 						<div>

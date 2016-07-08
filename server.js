@@ -407,6 +407,18 @@ server.register(require('inert'), (err) => {
 	// OS Command Endpoints
     server.route({
         method: 'GET',
+        path: '/system/quit',
+        handler: function (request, reply) {
+			var cmd = "pkill chromium";
+            Exec(cmd, function (error, stdout, stderr) {
+				if (error) console.log("Error: " + error);
+				if (stderr) console.log("StdErr: " + stderr);
+				console.log(stdout);
+			});
+        }
+    });
+    server.route({
+        method: 'GET',
         path: '/system/shutdown',
         handler: function (request, reply) {
 			var cmd = "sudo shutdown -h now";
