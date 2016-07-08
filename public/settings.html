@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<head>
+		<title>CarPi Settings</title>
+		<link rel="stylesheet" href="lib/css/materialize.min.css">
+		<link rel="stylesheet" href="lib/css/font-awesome.css">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="navbar-fixed">
+			<nav class="blue darken-4">
+				<div class="nav-wrapper">
+					<a href="#!" class="brand-logo">CarPi</a>
+					<ul class="right">
+						<li><a href="/">Player</a></li>
+						<li><a href="bluetooth">Bluetooth</a></li>
+						<li class="active"><a href="#">Settings</a></li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+		<div class="row">
+			<div class="col s12">
+				<div class="card grey">
+					<div class="card-content white-text">
+						<a class="waves-effect waves-light btn blue" data-bind="click: vm.shutdown">Shutdown</a>
+						<a class="waves-effect waves-light btn blue" data-bind="click: vm.reboot">Reboot</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="lib/js/knockout.min.js"></script>
+		<script src="lib/js/jquery-2.2.4.min.js"></script>
+		<script src="lib/js/materialize.min.js"></script>
+		<script src="lib/js/core.js"></script>
+		<script src="lib/shared/settings.js"></script>
+	</body>
+</html>

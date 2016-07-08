@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	<head>
+		<title>CarPi Player</title>
+		<link rel="stylesheet" href="lib/css/materialize.min.css">
+		<link rel="stylesheet" href="lib/css/nouislider.css">
+		<link rel="stylesheet" href="lib/css/font-awesome.css">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="navbar-fixed">
+			<nav class="blue darken-4">
+				<div class="nav-wrapper">
+					<a href="#!" class="brand-logo">CarPi</a>
+					<ul class="right">
+						<li class="active"><a href="#">Player</a></li>
+						<li><a href="bluetooth">Bluetooth</a></li>
+						<li><a href="settings">Settings</a></li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+		<div class="row">
+			<div class="col s12">
+				<div class="card grey">
+					<div class="card-content white-text">
+						<span class="right" data-bind="click: vm.refresh" style="display: none;"><i class="fa fa-refresh"></i></span>
+						<span class="card-title" data-bind="text: vm.track.title"></span>
+						<div id="volume" style="margin-top: 25px;margin-bottom: 25px;"></div>
+						<i class="fa fa-volume-down left"></i>
+						<i class="fa fa-volume-up right"></i>
+						<div style="text-align: center;">
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.previous"><i class="fa fa-step-backward"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.play"><i class="fa fa-play"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.pause"><i class="fa fa-pause"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.next"><i class="fa fa-step-forward"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="lib/js/knockout.min.js"></script>
+		<script src="lib/js/jquery-2.2.4.min.js"></script>
+		<script src="lib/js/materialize.min.js"></script>
+		<script src="lib/js/core.js"></script>
+		<script src="lib/js/nouislider.min.js"></script>
+		<script src="lib/shared/index.js"></script>
+	</body>
+</html>

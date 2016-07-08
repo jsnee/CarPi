@@ -1,0 +1,18 @@
+{
+  "name": "car-pi",
+  "version": "0.0.0",
+  "description": "Node server built to host interface for bluetooth media center",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hapi": "^13.4.1",
+    "inert": "^4.0.0",
+    "loudness": "^0.2.2",
+    "python-shell": "^0.4.0",
+    "sys": "0.0.1"
+  }
+}
