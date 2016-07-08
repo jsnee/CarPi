@@ -1,5 +1,6 @@
 #! /bin/sh
 
-rm ~/master.zip
-rm -r ~/CarPi-master
-./launch-car-pi.sh
+cd ~
+rm master.zip
+rm -r CarPi-master
+./car-pi/launch-car-pi.sh
