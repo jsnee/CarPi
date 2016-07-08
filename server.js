@@ -144,7 +144,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/play',
         handler: function (request, reply) {
-            PythonShell.run('bin/play.py', function (err) {
+            PythonShell.run('bin/play.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
                 reply('{Message: "Playing ..."}');
             });
@@ -155,7 +155,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/pause',
         handler: function (request, reply) {
-            PythonShell.run('bin/pause.py', function (err) {
+            PythonShell.run('bin/pause.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
                 reply('{Message: "Pausing ..."}');
             });
@@ -166,7 +166,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/next',
         handler: function (request, reply) {
-            PythonShell.run('bin/next.py', function (err) {
+            PythonShell.run('bin/next.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
                 reply('{Message: "Next Track ..."}');
             });
@@ -177,7 +177,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/previous',
         handler: function (request, reply) {
-            PythonShell.run('bin/previous.py', function (err) {
+            PythonShell.run('bin/previous.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
                 reply('{Message: "Previous Track ..."}');
             });
