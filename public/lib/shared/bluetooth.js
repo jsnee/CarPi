@@ -4,6 +4,7 @@ vm.bluetoothDevices = ko.observableArray([]);
 vm.foundDevices = ko.observableArray([]);
 vm.bluetoothDevice = ko.observable();
 vm.discovering = ko.observable(false);
+vm.connectedDevice = ko.observable();
 
 vm.beginPairing = function () {
 	vm.foundDevices([]);
@@ -40,5 +41,6 @@ vm.unpair = function (device) {
 };
 
 $.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
+$.get("/controls/device", vm.connectedDevice);
 
 ko.applyBindings(vm);

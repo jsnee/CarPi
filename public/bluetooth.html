@@ -28,6 +28,7 @@
 					<!-- ko foreach: vm.bluetoothDevices -->
 					<div class="card-content white-text">
 						<span class="card-title activator" data-bind="click: function (data, event) { vm.bluetoothDevice(data); }">
+							<i class="fa fa-bluetooth right" data-bind="visible: vm.connectedDevice() == address"></i>
 							<span class="activator" data-bind="text: name"></span>
 						</span>
 					</div>
@@ -44,8 +45,8 @@
 							</div>
 						</blockquote>
 						<div class="right">
-							<a data-bind="click: vm.connect" class="waves-effect waves-light btn">Connect</a>
-							<a data-bind="click: vm.disconnect" class="waves-effect waves-light btn">Disconnect</a>
+							<a data-bind="click: vm.connect, visible: vm.connectedDevice() != address" class="waves-effect waves-light btn">Connect</a>
+							<a data-bind="click: vm.disconnect, visible: vm.connectedDevice() == address" class="waves-effect waves-light btn">Disconnect</a>
 							<a data-bind="click: vm.unpair" class="waves-effect waves-light btn">Unpair</a>
 						</div>
 					</div>

@@ -12,6 +12,12 @@ const Https = require('https');
 // Read in package info
 const CarPiInfo = require('./package.json');
 
+var getDevice = function () {
+    if (server.app.device == null) {
+    }
+    return server.app.device;
+};
+
 String.prototype.format = function () {
 	var args = arguments;
 	return this.replace(/{(\d+)}/g, function (match, number) {
@@ -211,6 +217,35 @@ server.register(require('inert'), (err) => {
 	
     server.route({
         method: 'GET',
+        path: '/controls/listDevices',
+        handler: function (request, reply) {
+			var cmd = "echo 'quit' | bluetoothctl";
+            Exec(cmd, function (error, stdout, stderr) {
+				if (error) console.log("Error: " + error);
+				if (stderr) console.log("StdErr: " + stderr);
+                var devices = [];
+                if (stdout) {
+                    var data = stdout.split(" Device ");
+                    if (data.length > 1) {
+                        var escapeChar = "";
+                        data.shift();
+                        devices = data.select(function (each) {
+                            var str = each.split(escapeChar)[0].trim();
+                            var ndx = str.indexOf(" ");
+                            return {
+                                name: str.substring(ndx).trim(),
+                                address: str.substring(0, ndx).trim()
+                            };
+                        });
+                    }
+                }
+                reply(devices);
+			});
+        }
+    });
+	
+    server.route({
+        method: 'GET',
         path: '/controls/discoverable/{state}',
         handler: function (request, reply) {
 			var cmd = "echo 'discoverable {0}\nquit' | bluetoothctl".format(request.params.state == "on" ? "on" : "off");
@@ -224,13 +259,26 @@ server.register(require('inert'), (err) => {
 	
     server.route({
         method: 'GET',
+        path: '/controls/device',
+        handler: function (request, reply) {
+            reply(getDevice());
+        }
+    });
+	
+    server.route({
+        method: 'GET',
         path: '/controls/connect/{device}',
         handler: function (request, reply) {
 			var cmd = "echo 'trust {0}\n connect {0}\nquit' | bluetoothctl".format(request.params.device);
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
-				reply(stdout);
+                if (stdout.toLowerCase().indexOf("not available") > 0) {
+                    reply(false);
+                } else {
+                    server.app.device = request.params.device;
+				    reply(true);
+                }
 			});
         }
     });
@@ -243,7 +291,12 @@ server.register(require('inert'), (err) => {
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
-				reply(stdout);
+                if (stdout.toLowerCase().indexOf("not available") > 0 || request.params.device != getDevice()) {
+                    reply(false);
+                } else {
+                    server.app.device = null;
+				    reply(true);
+                }
 			});
         }
     });
