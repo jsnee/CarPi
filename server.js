@@ -321,7 +321,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/system/updateAvailable',
         handler: function (request, reply) {
-            https.get('https://raw.githubusercontent.com/jsnee/CarPi/master/package.json', function (res) {
+            Https.get('https://raw.githubusercontent.com/jsnee/CarPi/master/package.json', function (res) {
                 res.on('data', function (data) {
                     reply(data);
                 });
