@@ -27,11 +27,19 @@ vm.pairDevice = function (device) {
 };
 
 vm.connect = function (device) {
-	$.get("/controls/connect/{0}?_u={1}".format(device.address, new Date().getTime()));
+	$.get("/controls/connect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
+		if (result) {
+			vm.connectedDevice(device.address);
+		}
+	});
 };
 
 vm.disconnect = function (device) {
-	$.get("/controls/disconnect/{0}?_u={1}".format(device.address, new Date().getTime()));
+	$.get("/controls/disconnect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
+		if (result) {
+			vm.connectedDevice(null);
+		}
+	});
 };
 
 vm.unpair = function (device) {
