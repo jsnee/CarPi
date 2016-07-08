@@ -7,10 +7,22 @@ const Sys = require('sys')
 const Exec = require('child_process').exec;
 const Loudness = require('loudness');
 const Https = require('https');
+const Wireless = require('wireless');
 //function puts(error, stdout, stderr) { Sys.puts(stdout) }
 
 // Read in package info
 const CarPiInfo = require('./package.json');
+
+var wireless = new Wireless({
+    iface: 'wlan0',
+    updateFrequency: 10, // Optional, seconds to scan for networks
+    connectionSpyFrequency: 2, // Optional, seconds to scan if connected
+    vanishThreshold: 2 // Optional, how many scans before network considered gone
+});
+
+wireless.enable(function(err) {
+    wireless.start();
+});
 
 var getDevice = function () {
     if (server.app.device == null) {
@@ -348,6 +360,15 @@ server.register(require('inert'), (err) => {
 					};
 				}));
 			});
+        }
+    });
+
+    // Wi-fi Endpoints
+    server.route({
+        method: 'GET',
+        path: '/wireless/list',
+        handler: function (request, reply) {
+			reply(wireless.list());
         }
     });
 
