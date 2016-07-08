@@ -6,7 +6,11 @@ const PythonShell = require('python-shell');
 const Sys = require('sys')
 const Exec = require('child_process').exec;
 const Loudness = require('loudness');
+const Https = require('https');
 //function puts(error, stdout, stderr) { Sys.puts(stdout) }
+
+// Read in package info
+const CarPiInfo = require('./package.json');
 
 String.prototype.format = function () {
 	var args = arguments;
@@ -292,13 +296,13 @@ server.register(require('inert'), (err) => {
 			});
         }
     });
-	
-	// OS Command Endpoints
+
+    // CarPi Command Endpoints
     server.route({
         method: 'GET',
-        path: '/system/shutdown',
+        path: '/system/update',
         handler: function (request, reply) {
-			var cmd = "sudo shutdown -h now";
+			var cmd = "./update.sh";
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
@@ -308,9 +312,29 @@ server.register(require('inert'), (err) => {
     });
     server.route({
         method: 'GET',
-        path: '/system/update',
+        path: '/system/info',
         handler: function (request, reply) {
-			var cmd = "./update.sh";
+			reply({ version: CarPiInfo.version });
+        }
+    });
+    server.route({
+        method: 'GET',
+        path: '/system/updateAvailable',
+        handler: function (request, reply) {
+            https.get('https://raw.githubusercontent.com/jsnee/CarPi/master/package.json', function (res) {
+                res.on('data', function (data) {
+                    reply(data);
+                });
+            });
+        }
+    });
+	
+	// OS Command Endpoints
+    server.route({
+        method: 'GET',
+        path: '/system/shutdown',
+        handler: function (request, reply) {
+			var cmd = "sudo shutdown -h now";
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
