@@ -308,6 +308,18 @@ server.register(require('inert'), (err) => {
     });
     server.route({
         method: 'GET',
+        path: '/system/update',
+        handler: function (request, reply) {
+			var cmd = "./update.sh";
+            Exec(cmd, function (error, stdout, stderr) {
+				if (error) console.log("Error: " + error);
+				if (stderr) console.log("StdErr: " + stderr);
+				console.log(stdout);
+			});
+        }
+    });
+    server.route({
+        method: 'GET',
         path: '/system/reboot',
         handler: function (request, reply) {
 			var cmd = "sudo reboot";
