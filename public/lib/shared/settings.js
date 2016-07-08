@@ -19,7 +19,7 @@ vm.updateAvailable = ko.computed(function () {
 		);
 });
 
-vm.checkForUpdate = function () {
+vm.checkForUpdates = function () {
 	$.get("/system/updateAvailable", function (data) {
 		var latest = null;
 		if (data) latest = JSON.parse(data);
