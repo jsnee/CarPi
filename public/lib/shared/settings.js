@@ -42,3 +42,5 @@ vm.reboot = function () {
 $.get("/system/info", vm.carPiInfo);
 
 ko.applyBindings(vm);
+
+$("#keyboard").keyboard();
