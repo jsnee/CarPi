@@ -7,7 +7,7 @@ vm.discovering = ko.observable(false);
 vm.connectedDevice = ko.observable();
 
 vm.bluetoothDevices.subscribe(function (value) {
-	vm.connectedDevice(null);
+	//vm.connectedDevice(null);
 	if (value && value.length) {
 		value.forEach(function (each) {
 			$.get("/controls/device/{0}".format(each.address), function (deviceProps) {
@@ -43,7 +43,8 @@ vm.connect = function (device) {
 	$.get("/controls/connect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
 		if (result) {
 			setTimeout(function () {
-				$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
+				//$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
+				vm.connectedDevice(device.address);
 			});
 		}
 	});
@@ -53,7 +54,8 @@ vm.disconnect = function (device) {
 	$.get("/controls/disconnect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
 		if (result) {
 			setTimeout(function () {
-				$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
+				vm.connectedDevice(null);
+				//$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
 			});
 		}
 	});
