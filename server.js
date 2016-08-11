@@ -60,12 +60,13 @@ String.prototype.replaceAll = function (search, replace) {
     return this.split(search).join(replace);
 };
 
-function connectToFirstAvailable(deviceList) {
+function connectToFirstAvailable(deviceList, callback) {
     if (deviceList && deviceList.length) {
         var device = deviceList.shift();
         var address = device.address || device.Address || device;
         connectDevice(address, function (result) {
             if (!result) connectToFirstAvailable(deviceList);
+            else callback(device);
         });
     }
 };
@@ -111,6 +112,15 @@ function listNearbyDevices(callback) {
         callback(JSON.parse(data).select(function (each) { return each && each.length == 2 ? { name: each[1], address: each[0] } : null; }));
     });
 };
+
+function devicePlay(device) {
+    var address = device.address || device.Address || device;
+    PythonShell.run('bin/play.py', { args: [address.replaceAll(":", "_")] }, function (err) {
+        if (err) throw err;
+        reply('{Message: "Playing ..."}');
+    });
+};
+
 
 const server = new Hapi.Server({
     connections: {
@@ -196,10 +206,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/play',
         handler: function (request, reply) {
-            PythonShell.run('bin/play.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
-                if (err) throw err;
-                reply('{Message: "Playing ..."}');
-            });
+            devicePlay(getDevice());
         }
     });
 	
@@ -460,7 +467,7 @@ server.start((err) => {
 
     listPairedDevices(function (pairedDevices) {
         if (pairedDevices && pairedDevices.length) {
-            connectToFirstAvailable(pairedDevices);
+            connectToFirstAvailable(pairedDevices, devicePlay);
         }
     });
 });
