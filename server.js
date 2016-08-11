@@ -60,6 +60,16 @@ String.prototype.replaceAll = function (search, replace) {
     return this.split(search).join(replace);
 };
 
+function connectToFirstAvailable(deviceList) {
+    if (deviceList && deviceList.length) {
+        var device = deviceList.shift();
+        var address = device.address || device.Address || device;
+        connectDevice(address, function (result) {
+            if (!result) connectToFirstAvailable(deviceList);
+        });
+    }
+};
+
 function connectDevice(deviceAddress, callback) {
     var cmd = "echo 'trust {0}\n connect {0}\nquit' | bluetoothctl".format(deviceAddress);
     Exec(cmd, function (error, stdout, stderr) {
@@ -98,7 +108,7 @@ function listPairedDevices(callback) {
 function listNearbyDevices(callback) {
     PythonShell.run('bin/deviceDiscovery.py', function (err, data) {
         if (err) throw err;
-        callback(JSON.parse(data));
+        callback(JSON.parse(data).select(function (each) { return each && each.length == 2 ? { name: each[1], address: each[0] } : null; }));
     });
 };
 
@@ -450,17 +460,7 @@ server.start((err) => {
 
     listPairedDevices(function (pairedDevices) {
         if (pairedDevices && pairedDevices.length) {
-            var pairedAddresses = pairedDevices.select(function (each) { return each.address; });
-            listNearbyDevices(function (nearbyDevices) {
-                if (nearbyDevices && nearbyDevices.length) {
-                    var connectableDevice = nearbyDevices.find(function (nearbyDevice) {
-                        return pairedAddresses.contains(nearbyDevice.Address);
-                    });
-                    if (connectableDevice) {
-                        connectDevice(connectableDevice.Address);
-                    }
-                }
-            });
+            connectToFirstAvailable(pairedDevices);
         }
     });
 });
