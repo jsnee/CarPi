@@ -12,8 +12,8 @@ const CarPiInfo = require('./package.json');
 
 var getDevice = function () {
     if (server.app.device != null) {
-        var info = getDeviceConnection(server.app.device);
-        if (!info.Connected) server.app.device = null;
+        //var info = getDeviceConnection(server.app.device);
+        //if (!info.Connected) server.app.device = null;
     }
     return server.app.device;
 };

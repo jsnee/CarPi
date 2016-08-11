@@ -26,15 +26,16 @@
 					<div class="card-content white-text">
 						<span class="right" data-bind="click: vm.refresh" style="display: none;"><i class="fa fa-refresh"></i></span>
 						<span class="card-title" data-bind="text: vm.track.title"></span>
-						<div id="volume" style="margin-top: 25px;margin-bottom: 25px;"></div>
-						<i class="fa fa-volume-down left"></i>
-						<i class="fa fa-volume-up right"></i>
+						<div id="scrubber" style="margin-top: 25px;margin-bottom: 25px;"></div>
 						<div style="text-align: center;">
 							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.previous"><i class="fa fa-step-backward"></i></a>
 							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.play"><i class="fa fa-play"></i></a>
 							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.pause"><i class="fa fa-pause"></i></a>
 							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.next"><i class="fa fa-step-forward"></i></a>
 						</div>
+						<div id="volume" style="margin-top: 25px;margin-bottom: 25px;"></div>
+						<i class="fa fa-volume-down left"></i>
+						<i class="fa fa-volume-up right"></i>
 					</div>
 				</div>
 			</div>
