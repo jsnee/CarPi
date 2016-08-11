@@ -29,7 +29,7 @@ vm.info.subscribe(function (value) {
 });
 
 vm.track.position.subscribe(function (value) {
-    scrubber.noUiSlider.set([value, vm.track.duration() || 100]);
+    scrubber.noUiSlider.set([value]);
 })
 
 vm.loadNewTrack = function (mediaPlayer) {
@@ -46,6 +46,15 @@ vm.loadNewTrack = function (mediaPlayer) {
     vm.track.artist(mediaPlayer.Track.Artist);
     vm.track.title(mediaPlayer.Track.Title);
     vm.track.duration(mediaPlayer.Track.Duration);
+    scrubber.noUiSlider.destroy()
+    noUiSlider.create(scrubber, {
+        start: mediaPlayer.Position,
+        connect: 'lower',
+        range: {
+            'min': 0,
+            'max': mediaPlayer.Track.Duration
+        }
+    });
     vm.track.position(mediaPlayer.Position);
 };
 
