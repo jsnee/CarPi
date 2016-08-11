@@ -3,11 +3,9 @@
 const Hapi = require('hapi');
 const Path = require('path');
 const PythonShell = require('python-shell');
-const Sys = require('sys')
 const Exec = require('child_process').exec;
 const Loudness = require('loudness');
 const Https = require('https');
-//function puts(error, stdout, stderr) { Sys.puts(stdout) }
 
 // Read in package info
 const CarPiInfo = require('./package.json');
@@ -430,4 +428,11 @@ server.start((err) => {
     }
 
     console.log('Server running at: ', server.info.uri);
+    console.log('Starting browser ...');
+    var cmd = "export DISPLAY=:0 && chromium-browser --incognito --kiosk http://localhost:3000";
+    Exec(cmd, function (error, stdout, stderr) {
+        if (error) console.log("Error: " + error);
+        if (stderr) console.log("StdErr: " + stderr);
+        console.log(stdout);
+    });
 });

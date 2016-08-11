@@ -2,6 +2,6 @@
 
 cd /home/pi/car-pi
 npm install
-node server.js
+pm2 start server.js --name="CarPi"
 #x-www-browser http://localhost:3000
-#chromium-browser --kiosk http://localhost:3000
+chromium-browser --incognito --kiosk http://localhost:3000
