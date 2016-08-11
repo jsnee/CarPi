@@ -113,11 +113,11 @@ function listNearbyDevices(callback) {
     });
 };
 
-function devicePlay(device) {
+function devicePlay(device, callback) {
     var address = device.address || device.Address || device;
     PythonShell.run('bin/play.py', { args: [address.replaceAll(":", "_")] }, function (err) {
         if (err) throw err;
-        reply('{Message: "Playing ..."}');
+        if (callback) callback('{Message: "Playing "}');
     });
 };
 
@@ -206,7 +206,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/play',
         handler: function (request, reply) {
-            devicePlay(getDevice());
+            devicePlay(getDevice(), reply);
         }
     });
 	
