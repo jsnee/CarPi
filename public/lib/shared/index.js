@@ -66,7 +66,7 @@ function msToTime(s) {
     var mins = s % 60;
     var hrs = (s - mins) / 60;
 
-    return mins + ':' + secs;
+    return mins + ':' + (secs < 10 ? '0' + secs : secs);
 }
 
 vm.trackPosition = ko.computed(function () {
