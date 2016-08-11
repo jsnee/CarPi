@@ -1,7 +1,8 @@
 #! /bin/sh
 
-sudo apt-get install bluez pulseaudio-module-bluetooth python-gobject python-gobject-2 node npm chromium-browser -y
+sudo apt-get install bluez pulseaudio-module-bluetooth python-gobject python-gobject-2 node npm chromium-browser python-dev libbluetooth-dev -y
 sudo npm install pm2 -g
+sudo pip install pybluez
 cd car-pi
 npm install
 #pm2 stop all

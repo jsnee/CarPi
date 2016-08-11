@@ -187,29 +187,11 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/scan',
         handler: function (request, reply) {
-			var cmd = "echo 'power on\nscan on\nquit' | bluetoothctl";
-            Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-			});
-            Exec("hcitool scan", function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				if (stdout) {
-					var results = stdout.split("\n\t");
-					results.forEach(function (each) { each = each.split("\t"); });
-					reply(stdout.split("\n\t").select(function (each) {
-						var device = each.split("\t");
-						if (device.length != 2) return each;
-						return {
-							name: device[1].trim(),
-							address: device[0].trim()
-						};
-					}));
-				} else {
-					reply("There was a problem scanning ...");
-				}
-			});
+            var results;
+            PythonShell.run('bin/deviceDiscovery.py', function (err, data) {
+                if (err) throw err;
+                reply(JSON.parse(data));
+            });
         }
     });
 	
@@ -257,9 +239,13 @@ server.register(require('inert'), (err) => {
 	
     server.route({
         method: 'GET',
-        path: '/controls/device',
+        path: '/controls/device/{device}',
         handler: function (request, reply) {
-            reply(getDevice());
+            var results;
+            PythonShell.run('bin/Device/getConnection.py', { args: [request.params.device.replaceAll(":", "_")] }, function (err, data) {
+                if (err) throw err;
+                reply(JSON.parse(data));
+            });
         }
     });
 	

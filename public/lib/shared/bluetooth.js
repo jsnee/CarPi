@@ -6,6 +6,16 @@ vm.bluetoothDevice = ko.observable();
 vm.discovering = ko.observable(false);
 vm.connectedDevice = ko.observable();
 
+vm.bluetoothDevices.subscribe(function (value) {
+	if (value && value.length) {
+		value.forEach(function (each) {
+			$.get("/controls/device/{0}".format(each.address), function (deviceProps) {
+				if (deviceProps.Connected) vm.connectedDevice(deviceProps.Address);
+			});
+		});
+	}
+});
+
 vm.beginPairing = function () {
 	vm.foundDevices([]);
 	$.get("/controls/discoverable/on?_u={0}".format(new Date().getTime()));
@@ -49,6 +59,6 @@ vm.unpair = function (device) {
 };
 
 $.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
-$.get("/controls/device", vm.connectedDevice);
+//$.get("/controls/device", vm.connectedDevice);
 
 ko.applyBindings(vm);
