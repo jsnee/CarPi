@@ -7,7 +7,6 @@ vm.track = {
     title: ko.observable(),
     duration: ko.observable()
 };
-vm.volume = ko.observable();
 
 vm.info = ko.observable();
 
@@ -38,14 +37,7 @@ vm.loadNewTrack = function (mediaPlayer) {
             Duration: 100
         }
     }, mediaPlayer);
-    noUiSlider.create(scrubber, {
-        start: mediaPlayer.Position,
-        connect: 'lower',
-        range: {
-            'min': 0,
-            'max': mediaPlayer.Track.Duration
-        }
-    });
+    scrubber.noUiSlider.set([mediaPlayer.Position, mediaPlayer.Track.Duration]);
     vm.track.album(mediaPlayer.Track.Album);
     vm.track.artist(mediaPlayer.Track.Artist);
     vm.track.title(mediaPlayer.Track.Title);
@@ -74,24 +66,15 @@ vm.refresh = function () {
     });
 };
 
-var slider = document.getElementById('volume');
-noUiSlider.create(slider, {
-	start: 0,
-	connect: 'lower',
-	range: {
-		'min': 0,
-		'max': 100
-	}
-});
-
 var scrubber = document.getElementById('scrubber');
-
-
-vm.volume.subscribe(function (value) { slider.noUiSlider.set([value.volume]); });
-slider.noUiSlider.on('update', function (values, handle) {
-	if (vm.volume() && values[0] != vm.volume().volume) $.get("/controls/volume/set/{0}?_u={1}".format(values[0], new Date().getTime()), vm.volume);
+noUiSlider.create(scrubber, {
+    start: 0,
+    connect: 'lower',
+    range: {
+        'min': 0,
+        'max': 100
+    }
 });
-$.get("/controls/volume/get?_u={0}".format(new Date().getTime()), vm.volume);
 
 ko.applyBindings(vm);
 
