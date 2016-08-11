@@ -29,11 +29,25 @@ if (!Array.prototype.forEach) {
 	};
 }
 
+if (!Array.prototype.contains) {
+    Array.prototype.contains = function (value) {
+        for (var i = 0; i < this.length; i++) if (this[i] == value) return true;
+        return false;
+    };
+}
+
 if (!Array.prototype.select) {
     Array.prototype.select = function (func) {
         var list = [];
         for (var i = 0; i < this.length; i++) list.push(func.call(this[i], this[i]));
         return list;
+    };
+}
+
+if (!Array.prototype.find) {
+    Array.prototype.find = function (func) {
+        for (var i = 0; i < this.length; i++) if (func.call(this[i], this[i])) return this[i];
+        return null;
     };
 }
 
@@ -44,6 +58,48 @@ String.prototype.replaceAll = function (search, replace) {
         else return this.replaceAll([search.shift()]).replaceAll(search);
     }
     return this.split(search).join(replace);
+};
+
+function connectDevice(deviceAddress, callback) {
+    var cmd = "echo 'trust {0}\n connect {0}\nquit' | bluetoothctl".format(deviceAddress);
+    Exec(cmd, function (error, stdout, stderr) {
+        if (error) console.log("Error: " + error);
+        if (stderr) console.log("StdErr: " + stderr);
+        if (stdout.toLowerCase().indexOf("not available") > 0) {
+            if (callback) callback(false);
+        } else {
+            server.app.device = deviceAddress;
+            if (callback) callback(true);
+        }
+    });
+};
+
+function listPairedDevices(callback) {
+    var cmd = "echo 'paired-devices\nquit' | bluetoothctl";
+    Exec(cmd, function (error, stdout, stderr) {
+        if (error) console.log("Error: " + error);
+        if (stderr) console.log("StdErr: " + stderr);
+        var startIndex = stdout.indexOf("paired-devices") + 14;
+        var strLen = stdout.indexOf("quit") - 24;
+        var results = stdout.substring(startIndex, strLen).split("Device");
+        results.shift();
+        var result = results.select(function (each) {
+            var eachDevice = each.trim();
+            var splitNdx = eachDevice.indexOf(" ");
+            return {
+                name: eachDevice.substring(splitNdx + 1),
+                address: eachDevice.substring(0, splitNdx)
+            };
+        });
+        callback(result);
+    });
+};
+
+function listNearbyDevices(callback) {
+    PythonShell.run('bin/deviceDiscovery.py', function (err, data) {
+        if (err) throw err;
+        callback(JSON.parse(data));
+    });
 };
 
 const server = new Hapi.Server({
@@ -187,11 +243,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/scan',
         handler: function (request, reply) {
-            var results;
-            PythonShell.run('bin/deviceDiscovery.py', function (err, data) {
-                if (err) throw err;
-                reply(JSON.parse(data));
-            });
+            listNearbyDevices(reply);
         }
     });
 	
@@ -253,17 +305,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/connect/{device}',
         handler: function (request, reply) {
-			var cmd = "echo 'trust {0}\n connect {0}\nquit' | bluetoothctl".format(request.params.device);
-            Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-                if (stdout.toLowerCase().indexOf("not available") > 0) {
-                    reply(false);
-                } else {
-                    server.app.device = request.params.device;
-				    reply(true);
-                }
-			});
+			connectDevice(request.params.device, reply);
         }
     });
 	
@@ -315,23 +357,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/listPaired',
         handler: function (request, reply) {
-			var cmd = "echo 'paired-devices\nquit' | bluetoothctl";
-            Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				var startIndex = stdout.indexOf("paired-devices") + 14;
-				var strLen = stdout.indexOf("quit") - 24;
-				var results = stdout.substring(startIndex, strLen).split("Device");
-				results.shift();
-				reply(results.select(function (each) {
-					var eachDevice = each.trim();
-					var splitNdx = eachDevice.indexOf(" ");
-					return {
-						name: eachDevice.substring(splitNdx + 1),
-						address: eachDevice.substring(0, splitNdx)
-					};
-				}));
-			});
+			listPairedDevices(reply);
         }
     });
 
@@ -420,5 +446,21 @@ server.start((err) => {
         if (error) console.log("Error: " + error);
         if (stderr) console.log("StdErr: " + stderr);
         console.log(stdout);
+    });
+
+    listPairedDevices(function (pairedDevices) {
+        if (pairedDevices && pairedDevices.length) {
+            var pairedAddresses = pairedDevices.select(function (each) { return each.address; });
+            listNearbyDevices(function (nearbyDevices) {
+                if (nearbyDevices && nearbyDevices.length) {
+                    var connectableDevice = nearbyDevices.find(function (nearbyDevice) {
+                        return pairedAddresses.contains(nearbyDevice.Address);
+                    });
+                    if (connectableDevice) {
+                        connectDevice(connectableDevice.Address);
+                    }
+                }
+            });
+        }
     });
 });

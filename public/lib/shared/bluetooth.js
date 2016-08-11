@@ -39,7 +39,7 @@ vm.pairDevice = function (device) {
 vm.connect = function (device) {
 	$.get("/controls/connect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
 		if (result) {
-			vm.connectedDevice(device.address);
+			$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
 		}
 	});
 };
@@ -48,6 +48,7 @@ vm.disconnect = function (device) {
 	$.get("/controls/disconnect/{0}?_u={1}".format(device.address, new Date().getTime()), function (result) {
 		if (result) {
 			vm.connectedDevice(null);
+			$.get("/controls/listPaired?_u={0}".format(new Date().getTime()), vm.bluetoothDevices);
 		}
 	});
 };
