@@ -5,7 +5,8 @@ vm.track = {
     album: ko.observable(),
     artist: ko.observable(),
     title: ko.observable(),
-    duration: ko.observable()
+    duration: ko.observable(),
+    position: ko.observable()
 };
 
 vm.info = ko.observable();
@@ -19,13 +20,17 @@ vm.info.subscribe(function (value) {
         {
             vm.loadNewTrack(value.mediaPlayer);
         } else {
-            scrubber.noUiSlider.set([value.mediaPlayer.Position]);
+            vm.track.position(value.mediaPlayer.Position);
         }
         vm.playing(value.mediaPlayer.Status == "playing");
     } else {
         vm.playing(false);
     }
 });
+
+vm.track.position.subscribe(function (value) {
+    scrubber.noUiSlider.set([value, vm.track.duration() || 100]);
+})
 
 vm.loadNewTrack = function (mediaPlayer) {
     mediaPlayer = $.extend({
@@ -37,12 +42,32 @@ vm.loadNewTrack = function (mediaPlayer) {
             Duration: 100
         }
     }, mediaPlayer);
-    scrubber.noUiSlider.set([mediaPlayer.Position, mediaPlayer.Track.Duration]);
     vm.track.album(mediaPlayer.Track.Album);
     vm.track.artist(mediaPlayer.Track.Artist);
     vm.track.title(mediaPlayer.Track.Title);
     vm.track.duration(mediaPlayer.Track.Duration);
+    vm.track.position(mediaPlayer.Position);
 };
+
+function msToTime(s) {
+    var ms = s % 1000;
+    s = (s - ms) / 1000;
+    var secs = s % 60;
+    s = (s - secs) / 60;
+    var mins = s % 60;
+    var hrs = (s - mins) / 60;
+
+    return mins + ':' + secs;
+}
+
+vm.trackPosition = ko.computed(function () {
+    return msToTime(vm.track.position());
+});
+
+vm.timeRemaining = ko.computed(function () {
+    if (!vm.track.position() || !vm.track.duration()) return '--:--';
+    return '-' + msToTime(vm.track.duration() - vm.track.position());
+})
 
 vm.play = function () {
     $.get("/controls/play", function (result) { });
