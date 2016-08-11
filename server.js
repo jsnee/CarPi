@@ -354,7 +354,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/system/update',
         handler: function (request, reply) {
-			var cmd = "./~/car-pi/update.sh";
+			var cmd = "/home/pi/car-pi/update.sh";
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
