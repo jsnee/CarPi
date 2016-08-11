@@ -11,17 +11,32 @@ const Https = require('https');
 const CarPiInfo = require('./package.json');
 
 var getDevice = function () {
-    if (server.app.device == null) {
+    if (server.app.device != null) {
+        var info = getDeviceConnection(server.app.device);
+        if (!info.Connected) server.app.device = null;
     }
     return server.app.device;
 };
 
-String.prototype.format = function () {
-	var args = arguments;
-	return this.replace(/{(\d+)}/g, function (match, number) {
-		return (args[number] != undefined ? args[number] : '');
-	});
-};
+if (!String.prototype.replaceAll) {
+    String.prototype.replaceAll = function (search, replace) {
+        if (search instanceof Array) {
+            if (search.length < 1) return this;
+            if (search.length == 1) return this.replaceAll(search[0][0], search[0][1]);
+            else return this.replaceAll([search.shift()]).replaceAll(search);
+        }
+        return this.split(search).join(replace);
+    };
+}
+
+if (!String.prototype.format) {
+    String.prototype.format = function () {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function (match, number) {
+            return (args[number] != undefined ? args[number] : '');
+        });
+    };
+}
 
 if (!Array.prototype.forEach) {
 	Array.prototype.forEach = function (func) {
@@ -51,19 +66,14 @@ if (!Array.prototype.find) {
     };
 }
 
-String.prototype.replaceAll = function (search, replace) {
-    if (search instanceof Array) {
-        if (search.length < 1) return this;
-        if (search.length == 1) return this.replaceAll(search[0][0], search[0][1]);
-        else return this.replaceAll([search.shift()]).replaceAll(search);
-    }
-    return this.split(search).join(replace);
+function getDeviceAddress(device) {
+    return device.address || device.Address || device;
 };
 
 function connectToFirstAvailable(deviceList, callback) {
     if (deviceList && deviceList.length) {
         var device = deviceList.shift();
-        var address = device.address || device.Address || device;
+        var address = getDeviceAddress(device);
         connectDevice(address, function (result) {
             if (!result) connectToFirstAvailable(deviceList);
             else callback(device);
@@ -114,10 +124,26 @@ function listNearbyDevices(callback) {
 };
 
 function devicePlay(device, callback) {
-    var address = device.address || device.Address || device;
+    var address = getDeviceAddress(device);
     PythonShell.run('bin/play.py', { args: [address.replaceAll(":", "_")] }, function (err) {
         if (err) throw err;
         if (callback) callback('{Message: "Playing "}');
+    });
+};
+
+function getDeviceConnection(device, callback) {
+    var address = getDeviceAddress(device);
+    PythonShell.run('bin/Device/getConnection.py', { args: [address.replaceAll(":", "_")] }, function (err, data) {
+        if (err) throw err;
+        callback(JSON.parse(data));
+    });
+};
+
+function getMediaPlayerProperties(device, callback) {
+    var address = getDeviceAddress(device);
+    PythonShell.run('bin/getPlayerInfo.py', { args: [address.replaceAll(":", "_")] }, function (err, data) {
+        if (err) throw err;
+        callback(JSON.parse(data));
     });
 };
 
@@ -199,6 +225,24 @@ server.register(require('inert'), (err) => {
 				reply({volume: request.params.volume});
 			});
 		}
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/controls/info',
+        handler: function (request, reply) {
+            if (getDevice()) {
+                getDeviceConnection(getDevice(), function (deviceConnection) {
+                    if (deviceConnection && deviceConnection.Connected) {
+                        getMediaPlayerProperties(deviceConnection, function (mediaPlayer) {
+                            reply({ connectedDevice: deviceConnection, mediaPlayer: mediaPlayer });
+                        });
+                    }
+                });
+            } else {
+                reply({ connectedDevice: null, mediaPlayer: null });
+            }
+        }
     });
 
     // Python Media Control Endpoints
@@ -310,11 +354,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/controls/device/{device}',
         handler: function (request, reply) {
-            var results;
-            PythonShell.run('bin/Device/getConnection.py', { args: [request.params.device.replaceAll(":", "_")] }, function (err, data) {
-                if (err) throw err;
-                reply(JSON.parse(data));
-            });
+            getDeviceConnection(request.params.device, reply);
         }
     });
 	
