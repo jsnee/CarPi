@@ -110,8 +110,10 @@ noUiSlider.create(scrubber, {
     }
 });
 
+vm.trackInfo = ko.observable(false);
+
 ko.applyBindings(vm);
 
 setInterval(function () {
-    $.get("/controls/info", vm.info);
+    if (vm.trackInfo()) $.get("/controls/info", vm.info);
 }, 500);
