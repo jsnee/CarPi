@@ -24,7 +24,7 @@
 			<div class="col s12">
 				<div class="card grey">
 					<div class="card-content white-text">
-						<span data-bind="visible: vm.trackInfo" style="display: none;">
+						<span data-bind="visible: vm.trackInfo">
 							<span class="card-title" data-bind="visible: vm.track.title, text: vm.track.title"></span>
 							<div data-bind="visible: vm.track.artist, text: vm.track.artist"></div>
 							<div data-bind="visible: vm.track.album, text: vm.track.album"></div>
@@ -32,20 +32,18 @@
 							<span class="left" data-bind="text: vm.trackPosition"></span>
 							<span class="right" data-bind="text: vm.timeRemaining"></span>
 						</span>
-						<div style="text-align: center;">
-							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.previous"><i class="fa fa-step-backward"></i></a>
-							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.play"><i class="fa fa-play"></i></a>
-							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.pause"><i class="fa fa-pause"></i></a>
-							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.next"><i class="fa fa-step-forward"></i></a>
-						</div>
-						<!-- Switch -->
-						<div class="switch">
+						<div class="switch right">
 							<label>
-								Off
+								<span>Track Info</span>
 								<input type="checkbox" data-bind="checked: vm.trackInfo">
 								<span class="lever"></span>
-								On
 							</label>
+						</div>
+						<div style="text-align: center;">
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.previous"><i class="fa fa-step-backward"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="visible: !vm.trackInfo() || !vm.playing(), click: vm.play"><i class="fa fa-play"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="visible: !vm.trackInfo() || vm.playing(), click: vm.pause"><i class="fa fa-pause"></i></a>
+							<a class="btn-floating btn-large waves-effect waves-light blue darken-4" data-bind="click: vm.next"><i class="fa fa-step-forward"></i></a>
 						</div>
 					</div>
 				</div>

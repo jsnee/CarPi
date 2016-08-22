@@ -110,7 +110,7 @@ noUiSlider.create(scrubber, {
     }
 });
 
-vm.trackInfo = ko.observable(false);
+vm.trackInfo = ko.observable(true);
 
 ko.applyBindings(vm);
 
