@@ -74,10 +74,14 @@ function connectToFirstAvailable(deviceList, callback) {
     if (deviceList && deviceList.length) {
         var device = deviceList.shift();
         var address = getDeviceAddress(device);
-        connectDevice(address, function (result) {
-            if (!result) connectToFirstAvailable(deviceList);
-            else callback(device);
-        });
+        try {
+            connectDevice(address, function (result) {
+                if (!result) connectToFirstAvailable(deviceList, callback);
+                else callback(device);
+            });
+        } catch (err) {
+            connectToFirstAvailable(deviceList, callback);
+        }
     }
 };
 
