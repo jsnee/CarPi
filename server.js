@@ -86,16 +86,11 @@ function connectToFirstAvailable(deviceList, callback) {
 };
 
 function connectDevice(deviceAddress, callback) {
-    var cmd = "echo 'trust {0}\n connect {0}\nquit' | bluetoothctl".format(deviceAddress);
-    Exec(cmd, function (error, stdout, stderr) {
-        if (error) console.log("Error: " + error);
-        if (stderr) console.log("StdErr: " + stderr);
-        if (stdout.toLowerCase().indexOf("not available") > 0) {
-            if (callback) callback(false);
-        } else {
-            server.app.device = deviceAddress;
-            if (callback) callback(true);
-        }
+    PythonShell.run('bin/Bluetoothctl/connect.py', { args: [deviceAddress] }, function (err, data) {
+        if (err) throw err;
+        var connected = JSON.parse(data) === true;
+        if (connected) server.app.device = deviceAddress;
+        if (callback) callback(connected);
     });
 };
 
