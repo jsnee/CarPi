@@ -166,7 +166,7 @@ class Bluetoothctl:
             mac_addr_re = re.compile("^.*([0-9,:,A-F]{17}).*$")
             for line in out:
                 mac_addr = mac_addr_re.match(line)
-                if mac_addr != None && mac_addr.group(0).rstrip().endswith(" AUTH ENCRYPT"):
+                if mac_addr != None and mac_addr.group(0).rstrip().endswith(" AUTH ENCRYPT"):
                     res = True
         except BluetoothctlError, e:
             print(e)
@@ -183,7 +183,7 @@ class Bluetoothctl:
             mac_addr_re = re.compile("^.*([0-9,:,A-F]{17}).*$")
             for line in out:
                 mac_addr = mac_addr_re.match(line)
-                if mac_addr != None && mac_addr.group(0).rstrip().endswith(" AUTH ENCRYPT"):
+                if mac_addr != None and mac_addr.group(0).rstrip().endswith(" AUTH ENCRYPT"):
                     res = mac_addr.group(1)
         except BluetoothctlError, e:
             print(e)
