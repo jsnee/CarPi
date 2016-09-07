@@ -36,7 +36,7 @@ class Bluetoothctl:
     """A wrapper for bluetoothctl utility."""
 
     def __init__(self):
-        out = subprocess.check_output("rfkill unblock bluetooth", shell = True)
+        out = subprocess.check_output("sudo rfkill unblock bluetooth", shell = True)
         self.child = pexpect.spawn("bluetoothctl", echo = False)
 
     def get_output(self, command, pause = 0):
