@@ -12,44 +12,29 @@ vm.volume = ko.observable();
 
 vm.updateAvailable = ko.computed(function () {
 	if (!vm.carPiInfo() || !vm.carPiInfo().version || !vm.availableVersion()) return false;
-	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
-	var latestVer = vm.availableVersion().split(".").select(function (each) { return parseInt(each); });
-	return latestVer[MAJOR] > currentVer[MAJOR] ||
-		(latestVer[MAJOR] == currentVer[MAJOR] &&
-			(latestVer[MINOR] > currentVer[MINOR] ||
-				(latestVer[MINOR] == currentVer[MINOR] && latestVer[PATCH] > currentVer[PATCH])
-			)
-		);
+	return vm.availableVersion().canUpdate;
 });
 
 vm.isCurrentlyDev = ko.computed(function () {
 	if (!vm.carPiInfo() || !vm.carPiInfo().version) return false;
-	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
-	return String.fromCharCode(currentVer[SDLSTAGE] + 68) === "D";
+	return vm.carPiInfo().version.contains("-alpha");
 });
 
 vm.devUpdateAvailable = ko.computed(function () {
 	if (!vm.carPiInfo() || !vm.carPiInfo().version || !vm.availableDevVersion()) return false;
-	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
-	var latestVer = vm.availableDevVersion().split(".").select(function (each) { return parseInt(each); });
-	return latestVer[MAJOR] > currentVer[MAJOR] ||
-		(latestVer[MAJOR] == currentVer[MAJOR] &&
-			(latestVer[MINOR] > currentVer[MINOR] ||
-				(latestVer[MINOR] == currentVer[MINOR] && latestVer[PATCH] > currentVer[PATCH])
-			)
-		) || String.fromCharCode(currentVer[SDLSTAGE] + 68) === "M"; // Allow any updates from Master to Dev
+	return vm.availableDevVersion().canUpdate;
 });
 
 vm.checkForUpdates = function () {
 	$.get("/system/updateAvailable/master", function (data) {
 		var latest = null;
 		if (data) latest = JSON.parse(data);
-		if (latest) vm.availableVersion(latest.version);
+		if (latest) vm.availableVersion(latest);
 	});
 	$.get("/system/updateAvailable/dev", function (data) {
 		var latest = null;
 		if (data) latest = JSON.parse(data);
-		if (latest) vm.availableDevVersion(latest.version);
+		if (latest) vm.availableDevVersion(latest);
 	});
 };
 

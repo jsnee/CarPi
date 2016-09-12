@@ -6,6 +6,7 @@ const PythonShell = require('python-shell');
 const Exec = require('child_process').exec;
 const Loudness = require('loudness');
 const Https = require('https');
+const Semver = require('semver');
 
 // Read in package info
 const CarPiInfo = require('./package.json');
@@ -448,7 +449,13 @@ server.register(require('inert'), (err) => {
             var branchName = encodeURIComponent(request.params.branch) || "master";
             Https.get('https://raw.githubusercontent.com/jsnee/CarPi/{0}/package.json'.format(branchName), function (res) {
                 res.on('data', function (data) {
-                    reply(data);
+                    var currVer = Semver.clean(CarPiInfo.version);
+                    var availVer = Semver.clean((JSON.parse(data) || { version: null }).version);
+                    reply({
+                        current: currVer,
+                        available: availVer,
+                        canUpdate: Semver.lt(currVer, availVer)
+                    });
                 });
             });
         }
