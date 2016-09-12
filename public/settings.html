@@ -29,7 +29,9 @@
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.checkForUpdates">Check For Updates</a>						
 						<div data-bind="text: 'Current Version: {0}'.format(vm.carPiInfo() ? vm.carPiInfo().version : null), visible: vm.carPiInfo"></div>
 						<div data-bind="text: 'Available Version: {0}'.format(vm.availableVersion()), visible: vm.availableVersion"></div>
+						<div data-bind="text: 'Available Dev Version: {0}'.format(vm.availableDevVersion()), visible: vm.availableDevVersion"></div>
 						<a class="waves-effect waves-light btn blue btn-disabled" data-bind="click: vm.update, css: { 'btn-disabled': !vm.updateAvailable() }">Update</a>
+						<a class="waves-effect waves-light btn blue btn-disabled" data-bind="click: vm.updateDev, css: { 'btn-disabled': !vm.devUpdateAvailable() }">Update to Dev</a>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.quit">Quit Car-Pi</a>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.shutdown">Shutdown</a>
 						<a class="waves-effect waves-light btn blue" data-bind="click: vm.reboot">Reboot</a>

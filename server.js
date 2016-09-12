@@ -420,9 +420,13 @@ server.register(require('inert'), (err) => {
     // CarPi Command Endpoints
     server.route({
         method: 'GET',
-        path: '/system/update',
+        path: '/system/update/{branch?}',
         handler: function (request, reply) {
-			var cmd = "/home/pi/car-pi/update.sh";
+            var cmd = "/home/pi/car-pi/update.sh";
+            var branchName = encodeURIComponent(request.params.branch);
+            if (branchName) {
+                cmd = "{0} --branch {1}".format(cmd, branchName);
+            }
             Exec(cmd, function (error, stdout, stderr) {
 				if (error) console.log("Error: " + error);
 				if (stderr) console.log("StdErr: " + stderr);
@@ -439,9 +443,10 @@ server.register(require('inert'), (err) => {
     });
     server.route({
         method: 'GET',
-        path: '/system/updateAvailable',
+        path: '/system/updateAvailable/{branch?}',
         handler: function (request, reply) {
-            Https.get('https://raw.githubusercontent.com/jsnee/CarPi/master/package.json', function (res) {
+            var branchName = encodeURIComponent(request.params.branch) || "master";
+            Https.get('https://raw.githubusercontent.com/jsnee/CarPi/{0}/package.json'.format(branchName), function (res) {
                 res.on('data', function (data) {
                     reply(data);
                 });

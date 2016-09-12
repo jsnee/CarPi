@@ -6,6 +6,7 @@ var PATCH = 2;
 
 vm.carPiInfo = ko.observable();
 vm.availableVersion = ko.observable();
+vm.availableDevVersion = ko.observable();
 vm.volume = ko.observable();
 
 vm.updateAvailable = ko.computed(function () {
@@ -20,16 +21,37 @@ vm.updateAvailable = ko.computed(function () {
 		);
 });
 
+vm.devUpdateAvailable = ko.computed(function () {
+	if (!vm.carPiInfo() || !vm.carPiInfo().version || !vm.availableDevVersion()) return false;
+	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
+	var latestVer = vm.availableDevVersion().split(".").select(function (each) { return parseInt(each); });
+	return latestVer[MAJOR] > currentVer[MAJOR] ||
+		(latestVer[MAJOR] == currentVer[MAJOR] &&
+			(latestVer[MINOR] > currentVer[MINOR] ||
+				(latestVer[MINOR] == currentVer[MINOR] && latestVer[PATCH] > currentVer[PATCH])
+			)
+		);
+});
+
 vm.checkForUpdates = function () {
 	$.get("/system/updateAvailable", function (data) {
 		var latest = null;
 		if (data) latest = JSON.parse(data);
 		if (latest) vm.availableVersion(latest.version);
 	});
+	$.get("/system/updateAvailable/dev", function (data) {
+		var latest = null;
+		if (data) latest = JSON.parse(data);
+		if (latest) vm.availableDevVersion(latest.version);
+	});
 };
 
 vm.update = function () {
 	$.get("/system/update");
+};
+
+vm.updateDev = function () {
+	$.get("/system/update/dev");
 };
 
 vm.quit = function () {
