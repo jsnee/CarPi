@@ -21,4 +21,4 @@ done
 cd ~
 rm -r car-pi
 cp -r CarPi-${BRANCH} car-pi
-./car-pi/clean.sh
+./car-pi/clean.sh --branch ${BRANCH}

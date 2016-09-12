@@ -3,6 +3,7 @@ var vm = {};
 var MAJOR = 0;
 var MINOR = 1;
 var PATCH = 2;
+var SDLSTAGE = 3;
 
 vm.carPiInfo = ko.observable();
 vm.availableVersion = ko.observable();
@@ -21,6 +22,12 @@ vm.updateAvailable = ko.computed(function () {
 		);
 });
 
+vm.isCurrentlyDev = ko.computed(function () {
+	if (!vm.carPiInfo() || !vm.carPiInfo().version) return false;
+	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
+	return String.fromCharCode(currentVer[SDLSTAGE]) === "D";
+});
+
 vm.devUpdateAvailable = ko.computed(function () {
 	if (!vm.carPiInfo() || !vm.carPiInfo().version || !vm.availableDevVersion()) return false;
 	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
@@ -30,11 +37,11 @@ vm.devUpdateAvailable = ko.computed(function () {
 			(latestVer[MINOR] > currentVer[MINOR] ||
 				(latestVer[MINOR] == currentVer[MINOR] && latestVer[PATCH] > currentVer[PATCH])
 			)
-		);
+		) || String.fromCharCode(currentVer[SDLSTAGE]) === "M"; // Allow any updates from Master to Dev
 });
 
 vm.checkForUpdates = function () {
-	$.get("/system/updateAvailable", function (data) {
+	$.get("/system/updateAvailable/master", function (data) {
 		var latest = null;
 		if (data) latest = JSON.parse(data);
 		if (latest) vm.availableVersion(latest.version);
@@ -47,11 +54,17 @@ vm.checkForUpdates = function () {
 };
 
 vm.update = function () {
-	$.get("/system/update");
+	if (!vm.isCurrentlyDev()) $.get("/system/update/master");
+	else if (confirm("Revert to Stable CarPi build?")) {
+		$.get("/system/update/master");
+	}
 };
 
 vm.updateDev = function () {
-	$.get("/system/update/dev");
+	if (vm.isCurrentlyDev()) $.get("/system/update/dev");
+	else if (confirm("Switch to development CarPi builds?")) {
+		$.get("/system/update/dev");
+	}
 };
 
 vm.quit = function () {
