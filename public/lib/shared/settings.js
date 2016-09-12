@@ -25,7 +25,7 @@ vm.updateAvailable = ko.computed(function () {
 vm.isCurrentlyDev = ko.computed(function () {
 	if (!vm.carPiInfo() || !vm.carPiInfo().version) return false;
 	var currentVer = vm.carPiInfo().version.split(".").select(function (each) { return parseInt(each); });
-	return String.fromCharCode(currentVer[SDLSTAGE]) === "D";
+	return String.fromCharCode(currentVer[SDLSTAGE] + 68) === "D";
 });
 
 vm.devUpdateAvailable = ko.computed(function () {
@@ -37,7 +37,7 @@ vm.devUpdateAvailable = ko.computed(function () {
 			(latestVer[MINOR] > currentVer[MINOR] ||
 				(latestVer[MINOR] == currentVer[MINOR] && latestVer[PATCH] > currentVer[PATCH])
 			)
-		) || String.fromCharCode(currentVer[SDLSTAGE]) === "M"; // Allow any updates from Master to Dev
+		) || String.fromCharCode(currentVer[SDLSTAGE] + 68) === "M"; // Allow any updates from Master to Dev
 });
 
 vm.checkForUpdates = function () {
