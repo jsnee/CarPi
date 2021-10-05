@@ -5,11 +5,11 @@ sudo apt-get install bluez python-gobject python-gobject-2 node npm chromium-bro
 #Use custom package now
 cd car-pi
 #Make sure pulseaudio-module-bluetooth isn't already installed
-sudo dpkg -i --skip-same-version lib/pulseaudio-utils_5.0-13_armhf.deb
+#sudo dpkg -i --skip-same-version lib/pulseaudio-utils_5.0-13_armhf.deb
 #sudo apt-get -f install
-sudo dpkg -i --skip-same-version lib/pulseaudio_5.0-13_armhf.deb
-sudo dpkg -i --skip-same-version lib/pulseaudio-module-x11_5.0-13_armhf.deb
-sudo dpkg -i --skip-same-version lib/pulseaudio-module-bluetooth_5.0-13_armhf.deb
+#sudo dpkg -i --skip-same-version lib/pulseaudio_5.0-13_armhf.deb
+#sudo dpkg -i --skip-same-version lib/pulseaudio-module-x11_5.0-13_armhf.deb
+#sudo dpkg -i --skip-same-version lib/pulseaudio-module-bluetooth_5.0-13_armhf.deb
 sudo npm install pm2 -g
 sudo pip install pybluez
 npm install

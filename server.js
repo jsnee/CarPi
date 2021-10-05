@@ -1,6 +1,6 @@
 'use strict';
 
-const Hapi = require('hapi');
+const Hapi = require('@hapi/hapi');
 const Path = require('path');
 const PythonShell = require('python-shell');
 const Exec = require('child_process').exec;
@@ -39,9 +39,9 @@ if (!String.prototype.format) {
 }
 
 if (!Array.prototype.forEach) {
-	Array.prototype.forEach = function (func) {
-		for (var i = 0; i < this.length; i++) func.call(this[i], this[i]);
-	};
+    Array.prototype.forEach = function (func) {
+        for (var i = 0; i < this.length; i++) func.call(this[i], this[i]);
+    };
 }
 
 if (!Array.prototype.contains) {
@@ -146,26 +146,24 @@ function getMediaPlayerProperties(device, callback) {
     });
 };
 
+const start = async () => {
 
-const server = new Hapi.Server({
-    connections: {
+    const server = Hapi.server({
+        port: 3000,
         routes: {
             files: {
                 relativeTo: Path.join(__dirname, 'public')
             }
         }
-    }
-});
+    });
 
-server.connection({ port: 3000 });
-server.register(require('inert'), (err) => {
-    if (err) throw err;
+    await server.register(require('@hapi/inert'));
 
     server.route({
         method: 'GET',
         path: '/',
         handler: function (request, reply) {
-            reply.file('./index.html');
+            return reply.file('./index.html');
         }
     });
 
@@ -173,7 +171,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/bluetooth',
         handler: function (request, reply) {
-            reply.file('./bluetooth.html');
+            return reply.file('./bluetooth.html');
         }
     });
 
@@ -181,7 +179,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/settings',
         handler: function (request, reply) {
-            reply.file('./settings.html');
+            return reply.file('./settings.html');
         }
     });
 
@@ -189,7 +187,7 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/style.css',
         handler: function (request, reply) {
-            reply.file('./style.css');
+            return reply.file('./style.css');
         }
     });
 
@@ -203,27 +201,27 @@ server.register(require('inert'), (err) => {
             }
         }
     });
-	
-	// Loudness Volume Control Endpoints
+    
+    // Loudness Volume Control Endpoints
     server.route({
         method: 'GET',
         path: '/controls/volume/get',
         handler: function (request, reply) {
-			Loudness.getVolume(function (err, vol) {
-				if (err) throw err;
-				reply({volume: vol});
-			});
-		}
+            Loudness.getVolume(function (err, vol) {
+                if (err) throw err;
+                return reply({volume: vol});
+            });
+        }
     });
     server.route({
         method: 'GET',
         path: '/controls/volume/set/{volume}',
         handler: function (request, reply) {
-			Loudness.setVolume(request.params.volume, function (err) {
-				if (err) throw err;
-				reply({volume: request.params.volume});
-			});
-		}
+            Loudness.setVolume(request.params.volume, function (err) {
+                if (err) throw err;
+                return reply({volume: request.params.volume});
+            });
+        }
     });
 
     server.route({
@@ -234,12 +232,12 @@ server.register(require('inert'), (err) => {
                 getDeviceConnection(getDevice(), function (deviceConnection) {
                     if (deviceConnection && deviceConnection.Connected) {
                         getMediaPlayerProperties(deviceConnection, function (mediaPlayer) {
-                            reply({ connectedDevice: deviceConnection, mediaPlayer: mediaPlayer });
+                            return reply({ connectedDevice: deviceConnection, mediaPlayer: mediaPlayer });
                         });
                     }
                 });
             } else {
-                reply({ connectedDevice: null, mediaPlayer: null });
+                return reply({ connectedDevice: null, mediaPlayer: null });
             }
         }
     });
@@ -252,40 +250,40 @@ server.register(require('inert'), (err) => {
             devicePlay(getDevice(), reply);
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/pause',
         handler: function (request, reply) {
             PythonShell.run('bin/pause.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
-                reply('{Message: "Pausing ..."}');
+                return reply('{Message: "Pausing ..."}');
             });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/next',
         handler: function (request, reply) {
             PythonShell.run('bin/next.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
-                reply('{Message: "Next Track ..."}');
+                return reply('{Message: "Next Track ..."}');
             });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/previous',
         handler: function (request, reply) {
             PythonShell.run('bin/previous.py', { args: [getDevice().replaceAll(":", "_")] }, function (err) {
                 if (err) throw err;
-                reply('{Message: "Previous Track ..."}');
+                return reply('{Message: "Previous Track ..."}');
             });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/properties',
@@ -294,11 +292,11 @@ server.register(require('inert'), (err) => {
             PythonShell.run('bin/Adapter/getProperties.py', function (err, data) {
                 if (err) throw err;
                 if (Array.isArray(data)) data = data[0];
-                reply(JSON.parse(data));
+                return reply(JSON.parse(data));
             });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/scan',
@@ -306,15 +304,15 @@ server.register(require('inert'), (err) => {
             listNearbyDevices(reply);
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/listDevices',
         handler: function (request, reply) {
-			var cmd = "echo 'quit' | bluetoothctl";
+            var cmd = "echo 'quit' | bluetoothctl";
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
                 var devices = [];
                 if (stdout) {
                     var data = stdout.split(" Device ");
@@ -331,24 +329,24 @@ server.register(require('inert'), (err) => {
                         });
                     }
                 }
-                reply(devices);
-			});
+                return reply(devices);
+            });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/discoverable/{state}',
         handler: function (request, reply) {
-			var cmd = "echo 'discoverable {0}\nquit' | bluetoothctl".format(request.params.state == "on" ? "on" : "off");
+            var cmd = "echo 'discoverable {0}\nquit' | bluetoothctl".format(request.params.state == "on" ? "on" : "off");
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				reply(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                return reply(stdout);
+            });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/device/{device}',
@@ -356,64 +354,64 @@ server.register(require('inert'), (err) => {
             getDeviceConnection(request.params.device, reply);
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/connect/{device}',
         handler: function (request, reply) {
-			connectDevice(request.params.device, reply);
+            connectDevice(request.params.device, reply);
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/disconnect/{device}',
         handler: function (request, reply) {
-			var cmd = "echo 'disconnect {0}\nquit' | bluetoothctl".format(request.params.device);
+            var cmd = "echo 'disconnect {0}\nquit' | bluetoothctl".format(request.params.device);
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
                 if (stdout.toLowerCase().indexOf("not available") > 0 || request.params.device != getDevice()) {
-                    reply(false);
+                    return reply(false);
                 } else {
                     server.app.device = null;
-				    reply(true);
+                    return reply(true);
                 }
-			});
+            });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/pair/{device}',
         handler: function (request, reply) {
-			var cmd = "echo 'pair {0}\ntrust {0}\n connect {0}\nquit' | bluetoothctl".format(request.params.device);
+            var cmd = "echo 'pair {0}\ntrust {0}\n connect {0}\nquit' | bluetoothctl".format(request.params.device);
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				reply(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                return reply(stdout);
+            });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/unpair/{device}',
         handler: function (request, reply) {
-			var cmd = "echo 'remove {0}\nquit' | bluetoothctl".format(request.params.device);
+            var cmd = "echo 'remove {0}\nquit' | bluetoothctl".format(request.params.device);
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				reply(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                return reply(stdout);
+            });
         }
     });
-	
+    
     server.route({
         method: 'GET',
         path: '/controls/listPaired',
         handler: function (request, reply) {
-			listPairedDevices(reply);
+            listPairedDevices(reply);
         }
     });
 
@@ -422,19 +420,19 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/system/update',
         handler: function (request, reply) {
-			var cmd = "/home/pi/car-pi/update.sh";
+            var cmd = "/home/pi/car-pi/update.sh";
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				console.log(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                console.log(stdout);
+            });
         }
     });
     server.route({
         method: 'GET',
         path: '/system/info',
         handler: function (request, reply) {
-			reply({ version: CarPiInfo.version });
+            return reply({ version: CarPiInfo.version });
         }
     });
     server.route({
@@ -443,57 +441,51 @@ server.register(require('inert'), (err) => {
         handler: function (request, reply) {
             Https.get('https://raw.githubusercontent.com/jsnee/CarPi/master/package.json', function (res) {
                 res.on('data', function (data) {
-                    reply(data);
+                    return reply(data);
                 });
             });
         }
     });
-	
-	// OS Command Endpoints
+    
+    // OS Command Endpoints
     server.route({
         method: 'GET',
         path: '/system/quit',
         handler: function (request, reply) {
-			var cmd = "pkill chromium";
+            var cmd = "pkill chromium";
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				console.log(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                console.log(stdout);
+            });
         }
     });
     server.route({
         method: 'GET',
         path: '/system/shutdown',
         handler: function (request, reply) {
-			var cmd = "sudo shutdown -h now";
+            var cmd = "sudo shutdown -h now";
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				console.log(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                console.log(stdout);
+            });
         }
     });
     server.route({
         method: 'GET',
         path: '/system/reboot',
         handler: function (request, reply) {
-			var cmd = "sudo reboot";
+            var cmd = "sudo reboot";
             Exec(cmd, function (error, stdout, stderr) {
-				if (error) console.log("Error: " + error);
-				if (stderr) console.log("StdErr: " + stderr);
-				console.log(stdout);
-			});
+                if (error) console.log("Error: " + error);
+                if (stderr) console.log("StdErr: " + stderr);
+                console.log(stdout);
+            });
         }
     });
-});
 
-server.start((err) => {
-
-
-    if (err) {
-        throw err;
-    }
+    await server.start();
 
     console.log('Server running at: ', server.info.uri);
     console.log('Starting browser ...');
@@ -509,4 +501,6 @@ server.start((err) => {
             connectToFirstAvailable(pairedDevices, devicePlay);
         }
     });
-});
+};
+
+start();
